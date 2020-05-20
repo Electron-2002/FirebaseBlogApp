@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FireBaseApp</string>
+    <string name="add_blog">Add Blog</string>
+    <string name="enter_description">Enter Description</string>
+    <string name="title_of_the_blog">Title of the Blog</string>
+    <string name="submit_blog">SUBMIT BLOG</string>
+</resources>

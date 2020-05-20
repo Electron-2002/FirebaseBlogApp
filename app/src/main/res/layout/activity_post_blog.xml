@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    tools:context=".PostBlogActivity"
+    tools:viewBindingIgnore="false">
+
+    <ImageButton
+        android:id="@+id/blog_image"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"/>
+
+    <EditText
+        android:id="@+id/blog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blog_image"
+        android:hint="@string/title_of_the_blog"
+        android:inputType="text"
+        android:padding="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:background="@color/colorAccent"
+        android:textAllCaps="false"
+        android:textColor="@color/colorPrimaryDark"/>
+
+    <EditText
+        android:id="@+id/blog_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blog_title"
+        android:hint="@string/enter_description"
+        android:inputType="textMultiLine"
+        android:padding="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorAccent"
+        android:textAllCaps="false"
+        android:textColor="@color/colorPrimaryDark"/>
+
+    <Button
+        android:id="@+id/submit_blog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/submit_blog"
+        android:layout_alignParentBottom="true"
+        android:padding="20dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:layout_gravity="bottom"
+        android:background="@color/colorAccent"
+        android:textColor="@color/colorPrimaryDark"/>
+
+</RelativeLayout>
