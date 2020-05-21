@@ -1,8 +1,10 @@
 package com.example.firebaseapp;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ public class PostBlogActivity extends AppCompatActivity {
     private Uri imageUri;
     private StorageReference storage;
     private DatabaseReference database;
+    private AlertDialog.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,8 @@ public class PostBlogActivity extends AppCompatActivity {
 
         if (!TextUtils.isEmpty(title) && !TextUtils.isEmpty(description) && imageUri != null) {
             final StorageReference filePath = storage.child("Blog Images").child(Objects.requireNonNull(imageUri.getLastPathSegment()));
+            builder = new AlertDialog.Builder(this);
+            setDialog(true);
 
             filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -81,12 +86,19 @@ public class PostBlogActivity extends AppCompatActivity {
                             newBlog.child("title").setValue(title);
                             newBlog.child("description").setValue(description);
                             newBlog.child("imageUri").setValue(uri.toString());
+                            setDialog(false);
                         }
                     });
                 }
             });
-
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
         }
+    }
+
+    private void setDialog(boolean show){
+        builder.setView(R.layout.progress_layout);
+        Dialog dialog = builder.create();
+        if (show)dialog.show();
+        else dialog.dismiss();
     }
 }
