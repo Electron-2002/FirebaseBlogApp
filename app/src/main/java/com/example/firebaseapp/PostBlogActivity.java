@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.example.firebaseapp.databinding.ActivityPostBlogBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -28,6 +29,7 @@ public class PostBlogActivity extends AppCompatActivity {
     private Uri imageUri;
     private StorageReference storage;
     private DatabaseReference database;
+    private FirebaseAuth auth;
     private AlertDialog.Builder builder;
 
     @Override
@@ -39,6 +41,7 @@ public class PostBlogActivity extends AppCompatActivity {
 
         storage = FirebaseStorage.getInstance().getReference();
         database = FirebaseDatabase.getInstance().getReference().child("Blog");
+        auth = FirebaseAuth.getInstance();
 
         binding.blogImage.setOnClickListener(new View.OnClickListener() {
             @Override

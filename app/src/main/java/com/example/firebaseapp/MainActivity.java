@@ -1,12 +1,10 @@
 package com.example.firebaseapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,15 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.firebaseapp.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
-    DatabaseReference databaseReference;
-    StorageReference storageReference;
+    DatabaseReference mDatabase, mDatabaseUsers;
+    FirebaseAuth mAuth;
+    FirebaseAuth.AuthStateListener mAuthStateListener;
     ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +33,24 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mAuth = FirebaseAuth.getInstance();
+
+        mDatabase.keepSynced(true);
+        mDatabaseUsers.keepSynced(true);
+
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() == null) {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    finish();
+                    startActivity(intent);
+                }
+            }
+        };
 
         binding.blogList.setHasFixedSize(true);
         binding.blogList.setLayoutManager(new LinearLayoutManager(this));
@@ -44,17 +60,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        mAuth.addAuthStateListener(mAuthStateListener);
+
         FirebaseRecyclerAdapter<Blog, BlogViewHolder> adapter = new FirebaseRecyclerAdapter<Blog, BlogViewHolder>(
                 Blog.class,
                 R.layout.blog_item,
                 BlogViewHolder.class,
-                databaseReference
+                mDatabase
         ) {
             @Override
             protected void populateViewHolder(BlogViewHolder blogViewHolder, Blog blog, int i) {
-                blogViewHolder.setTitle(blog.getTitle());
-                blogViewHolder.setDescription(blog.getDescription());
-                blogViewHolder.setImageUri(blog.getImageUri());
+                    blogViewHolder.setTitle(blog.getTitle());
+                    blogViewHolder.setDescription(blog.getDescription());
+                    blogViewHolder.setImageUri(blog.getImageUri());
             }
         };
 
@@ -96,9 +114,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if (item.getItemId() == R.id.add_blog_sign) {
-            startActivity(new Intent(MainActivity.this, PostBlogActivity.class));
+        if (item.getItemId() == R.id.action_add_blog) {
+            Intent intent = new Intent(MainActivity.this, PostBlogActivity.class);
+            startActivity(intent);
+        }
+
+        if (item.getItemId() == R.id.action_logout) {
+            logout();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        mAuth.signOut();
     }
 }

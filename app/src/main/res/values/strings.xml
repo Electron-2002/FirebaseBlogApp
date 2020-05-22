@@ -4,4 +4,10 @@
     <string name="enter_description">Enter Description</string>
     <string name="title_of_the_blog">Title of the Blog</string>
     <string name="submit_blog">SUBMIT BLOG</string>
+    <string name="your_name">Your Name</string>
+    <string name="e_mail_address">E-mail Address</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="log_out">Log Out</string>
+    <string name="need_a_new_account">Need a New Account?</string>
 </resources>

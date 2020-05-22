@@ -2,8 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/add_blog_sign"
+        android:id="@+id/action_add_blog"
         android:icon="@drawable/add_blog_sign"
         android:title="@string/add_blog"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/log_out"
+        app:showAsAction="never" />
+
 </menu>
