@@ -10,4 +10,6 @@
     <string name="sign_up">Sign Up</string>
     <string name="log_out">Log Out</string>
     <string name="need_a_new_account">Need a New Account?</string>
+    <string name="log_in">Log In</string>
+    <string name="profile_name">Profile Name</string>
 </resources>

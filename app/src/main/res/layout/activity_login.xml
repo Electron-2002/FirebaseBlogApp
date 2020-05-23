@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -42,13 +43,22 @@
         android:id="@+id/login_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_up"
+        android:text="@string/log_in"
         android:padding="20dp"
         android:layout_below="@id/user_password"
         android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
         android:background="@color/colorAccent"
         android:textColor="@color/colorPrimaryDark"/>
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/google_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_user"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimary"/>
 
     <Button
         android:id="@+id/submit_blog"

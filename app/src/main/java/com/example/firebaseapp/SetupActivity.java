@@ -4,14 +4,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
-import com.example.firebaseapp.databinding.ActivityPostBlogBinding;
+import com.example.firebaseapp.databinding.ActivitySetupBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -22,26 +21,28 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.Objects;
 
-public class PostBlogActivity extends AppCompatActivity {
+public class SetupActivity extends AppCompatActivity {
 
-    private ActivityPostBlogBinding binding;
+    private ActivitySetupBinding binding;
+
     private static final int GALLERY_CODE = 1;
     private Uri imageUri;
+
     private StorageReference mStorage;
     private DatabaseReference mDatabase;
-    private AlertDialog.Builder builder;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityPostBlogBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
+        binding = ActivitySetupBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mStorage = FirebaseStorage.getInstance().getReference();
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
 
-        binding.blogImage.setOnClickListener(new View.OnClickListener() {
+        binding.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -50,10 +51,10 @@ public class PostBlogActivity extends AppCompatActivity {
             }
         });
 
-        binding.submitBlog.setOnClickListener(new View.OnClickListener() {
+        binding.setupAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                postBlog();
+                accountSetup();
             }
         });
     }
@@ -64,18 +65,16 @@ public class PostBlogActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_CODE && resultCode == RESULT_OK) {
             imageUri = data.getData();
-            binding.blogImage.setImageURI(imageUri);
+            binding.userImage.setImageURI(imageUri);
         }
     }
 
-    public void postBlog() {
-        final String title = binding.blogTitle.getText().toString().trim();
-        final String description = binding.blogDescription.getText().toString().trim();
+    private void accountSetup() {
+        final String name = binding.userName.getText().toString().trim();
+        final String userUID = mAuth.getCurrentUser().getUid();
 
-        if (!TextUtils.isEmpty(title) && !TextUtils.isEmpty(description) && imageUri != null) {
+        if (!TextUtils.isEmpty(name) && imageUri != null) {
             final StorageReference filePath = mStorage.child("Blog Images").child(Objects.requireNonNull(imageUri.getLastPathSegment()));
-            builder = new AlertDialog.Builder(this);
-            setDialog(true);
 
             filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -83,23 +82,14 @@ public class PostBlogActivity extends AppCompatActivity {
                     filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
-                            DatabaseReference newBlog = mDatabase.push();
-                            newBlog.child("title").setValue(title);
-                            newBlog.child("description").setValue(description);
-                            newBlog.child("imageUri").setValue(uri.toString());
-                            setDialog(false);
+                            DatabaseReference newUser = mDatabase.child(userUID);
+                            newUser.child("name").setValue(name);
+                            newUser.child("image").setValue(uri.toString());
                         }
                     });
                 }
             });
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startActivity(new Intent(SetupActivity.this, MainActivity.class));
         }
-    }
-
-    private void setDialog(boolean show){
-        builder.setView(R.layout.progress_layout);
-        Dialog dialog = builder.create();
-        if (show)dialog.show();
-        else dialog.dismiss();
     }
 }

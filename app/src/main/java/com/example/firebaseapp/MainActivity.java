@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,8 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.firebaseapp.databinding.ActivityMainBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         mAuth.addAuthStateListener(mAuthStateListener);
+
+        if (mAuth.getCurrentUser() != null)
+            checkUserInDatabase();
 
         FirebaseRecyclerAdapter<Blog, BlogViewHolder> adapter = new FirebaseRecyclerAdapter<Blog, BlogViewHolder>(
                 Blog.class,
@@ -123,6 +130,27 @@ public class MainActivity extends AppCompatActivity {
             logout();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void checkUserInDatabase() {
+        final String currentUser = mAuth.getCurrentUser().getUid();
+
+        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(currentUser)) {
+                    Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    finish();
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void logout() {

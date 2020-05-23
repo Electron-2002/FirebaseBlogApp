@@ -16,7 +16,6 @@ public class FireBaseApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (!FirebaseApp.getApps(this).isEmpty()) {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
             Picasso.Builder builder = new Picasso.Builder(this);
@@ -25,6 +24,5 @@ public class FireBaseApp extends Application {
             built.setIndicatorsEnabled(false);
             built.setLoggingEnabled(true);
             Picasso.setSingletonInstance(built);
-        }
     }
 }
