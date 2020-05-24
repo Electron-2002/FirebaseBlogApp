@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,10 +26,13 @@ import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
-    DatabaseReference mDatabase, mDatabaseUsers;
+    DatabaseReference mDatabase, mDatabaseUsers, mDatabaseLikes;
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthStateListener;
     ActivityMainBinding binding;
+
+    boolean mProcess = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,10 +42,12 @@ public class MainActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Blog");
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseLikes = FirebaseDatabase.getInstance().getReference().child("Likes");
         mAuth = FirebaseAuth.getInstance();
 
         mDatabase.keepSynced(true);
         mDatabaseUsers.keepSynced(true);
+        mDatabaseLikes.keepSynced(true);
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -58,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
 
         binding.blogList.setHasFixedSize(true);
         binding.blogList.setLayoutManager(new LinearLayoutManager(this));
+
+        if (mAuth.getCurrentUser() != null)
+            checkUserInDatabase();
     }
 
     @Override
@@ -65,9 +73,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         mAuth.addAuthStateListener(mAuthStateListener);
-
-        if (mAuth.getCurrentUser() != null)
-            checkUserInDatabase();
 
         FirebaseRecyclerAdapter<Blog, BlogViewHolder> adapter = new FirebaseRecyclerAdapter<Blog, BlogViewHolder>(
                 Blog.class,
@@ -77,9 +82,39 @@ public class MainActivity extends AppCompatActivity {
         ) {
             @Override
             protected void populateViewHolder(BlogViewHolder blogViewHolder, Blog blog, int i) {
-                    blogViewHolder.setTitle(blog.getTitle());
-                    blogViewHolder.setDescription(blog.getDescription());
-                    blogViewHolder.setImageUri(blog.getImageUri());
+                final String postID = getRef(i).getKey();
+                blogViewHolder.setTitle(blog.getTitle());
+                blogViewHolder.setDescription(blog.getDescription());
+                blogViewHolder.setImageUri(blog.getImageUri());
+                blogViewHolder.setUsername(blog.getUsername());
+
+                blogViewHolder.like.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mProcess = true;
+
+                        mDatabaseLikes.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                if (mProcess) {
+                                    if (dataSnapshot.child(postID).hasChild(mAuth.getCurrentUser().getUid())) {
+                                        mDatabaseLikes.child(postID).child(mAuth.getCurrentUser().getUid()).removeValue();
+                                        mProcess = false;
+                                    } else {
+                                        mDatabaseLikes.child(postID).child(mAuth.getCurrentUser().getUid()).setValue("random");
+                                        mProcess = false;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+                    }
+                });
             }
         };
 
@@ -89,10 +124,13 @@ public class MainActivity extends AppCompatActivity {
     public static class BlogViewHolder extends RecyclerView.ViewHolder {
 
         View view;
+        ImageButton like;
         public BlogViewHolder(@NonNull View itemView) {
             super(itemView);
 
             view = itemView;
+
+            like = view.findViewById(R.id.like_button);
         }
 
         void setTitle(String title) {
@@ -108,6 +146,11 @@ public class MainActivity extends AppCompatActivity {
         void setImageUri(String imageUri) {
             ImageView blogImage = view.findViewById(R.id.blog_item_image);
             Picasso.get().load(imageUri).into(blogImage);
+        }
+
+        void setUsername(String username) {
+            TextView blogUsername = view.findViewById(R.id.blog_item_username);
+            blogUsername.setText(username);
         }
     }
 

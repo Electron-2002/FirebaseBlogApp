@@ -12,6 +12,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/blog_item_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:padding="5dp"/>
+
         <ImageView
             android:id="@+id/blog_item_image"
             android:layout_width="match_parent"
@@ -34,6 +44,21 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:padding="5dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/like_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#000"
+                android:src="@drawable/baseline_thumb_up_white_18dp"
+                android:padding="5dp"
+                android:layout_marginStart="10sp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

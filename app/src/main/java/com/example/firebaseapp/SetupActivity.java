@@ -1,9 +1,11 @@
 package com.example.firebaseapp;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,11 +15,16 @@ import android.view.View;
 import com.example.firebaseapp.databinding.ActivitySetupBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.Objects;
 
@@ -27,6 +34,8 @@ public class SetupActivity extends AppCompatActivity {
 
     private static final int GALLERY_CODE = 1;
     private Uri imageUri;
+
+    private AlertDialog.Builder builder;
 
     private StorageReference mStorage;
     private DatabaseReference mDatabase;
@@ -65,7 +74,21 @@ public class SetupActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_CODE && resultCode == RESULT_OK) {
             imageUri = data.getData();
-            binding.userImage.setImageURI(imageUri);
+
+            CropImage.activity(imageUri)
+                    .setAspectRatio(1,1)
+                    .start(this);
+
+        }
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+                binding.userImage.setImageURI(imageUri);
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
         }
     }
 
@@ -74,6 +97,8 @@ public class SetupActivity extends AppCompatActivity {
         final String userUID = mAuth.getCurrentUser().getUid();
 
         if (!TextUtils.isEmpty(name) && imageUri != null) {
+            builder = new AlertDialog.Builder(this);
+            setDialog(true);
             final StorageReference filePath = mStorage.child("Blog Images").child(Objects.requireNonNull(imageUri.getLastPathSegment()));
 
             filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -85,11 +110,31 @@ public class SetupActivity extends AppCompatActivity {
                             DatabaseReference newUser = mDatabase.child(userUID);
                             newUser.child("name").setValue(name);
                             newUser.child("image").setValue(uri.toString());
+                            setDialog(false);
                         }
                     });
                 }
             });
-            startActivity(new Intent(SetupActivity.this, MainActivity.class));
+
+            mDatabase.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChild(userUID)) {
+                        startActivity(new Intent(SetupActivity.this, MainActivity.class));
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
+    }
+
+    private void setDialog(boolean show){
+        builder.setView(R.layout.progress_layout);
+        Dialog dialog = builder.create();
+        if (show)dialog.show();
+        else dialog.dismiss();
     }
 }
